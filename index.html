@@ -1,270 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BP &amp; Pulse Meter Evaluator</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BP &amp; Pulse Meter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --g1:#4338ca;--g2:#2563eb;--g3:#0d9488;
+  --card:#fff;--text:#1e1b4b;--muted:#5b6082;--line:#e4e7f5;--field:#f4f6ff;
+  --accent:#6366f1;--ink:#fff;
+  --font:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --g1:#1e1b4b;--g2:#172554;--g3:#064e4b;--card:#161a33;--text:#eef0ff;--muted:#a3a9d1;--line:#2a2f55;--field:#1d2244;}}
+:root[data-theme="dark"]{--g1:#1e1b4b;--g2:#172554;--g3:#064e4b;--card:#161a33;--text:#eef0ff;--muted:#a3a9d1;--line:#2a2f55;--field:#1d2244}
+*,*::before,*::after{box-sizing:inherit}
+html{background:var(--g1);scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;font-family:var(--font);color:var(--text);background:linear-gradient(160deg,var(--g1) 0%,var(--g2) 50%,var(--g3) 100%) fixed;line-height:1.55}
+.glow{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 85% 0%,var(--accent),transparent 60%);opacity:0;transition:opacity .8s}
+body.has-result .glow{opacity:.5}
+main{position:relative;max-width:760px;margin:0 auto;padding:24px 16px 40px}
+header{text-align:center;color:#fff;margin-bottom:20px}
+header h1{margin:8px 0 2px;font-size:1.7rem;font-weight:700}
+header p{margin:0;opacity:.85;font-size:.95rem}
+.heart{width:64px;height:64px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.3));animation:beat var(--beat,1s) infinite ease-in-out;transform-origin:center}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.1)}60%{transform:scale(1)}}
+.ecg{stroke-dasharray:60;stroke-dashoffset:60;animation:ecg var(--beat,1s) infinite linear}
+@keyframes ecg{0%{stroke-dashoffset:60}60%,100%{stroke-dashoffset:0}}
+.card{background:var(--card);border-radius:22px;padding:20px;box-shadow:0 18px 40px rgba(10,10,60,.28);margin-bottom:16px}
+.inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.field label{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:6px}
+.field label svg{width:16px;height:16px;flex:none}
+.field input{width:100%;font:600 1.6rem var(--font);text-align:center;color:var(--text);background:var(--field);border:2px solid transparent;border-radius:16px;padding:14px 4px;outline:none;transition:border-color .2s,box-shadow .2s;-moz-appearance:textfield}
+.field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.field input::placeholder{color:var(--muted);opacity:.45}
+.field input:focus{border-color:#6366f1;box-shadow:0 0 0 4px rgba(99,102,241,.2)}
+.field small{display:block;text-align:center;color:var(--muted);font-size:.72rem;margin-top:4px}
+.actions{display:flex;gap:10px;margin-top:16px}
+button{font:600 1rem var(--font);border:0;border-radius:14px;padding:14px 18px;cursor:pointer;transition:transform .15s,box-shadow .2s}
+button:focus-visible,summary:focus-visible{outline:3px solid #6366f1;outline-offset:2px}
+button:active{transform:scale(.97)}
+.primary{flex:1;color:#fff;background:linear-gradient(90deg,#6366f1,#0ea5e9 60%,#14b8a6);box-shadow:0 8px 18px rgba(14,165,233,.35)}
+.ghost{background:var(--field);color:var(--text)}
+.error{display:none;margin-top:14px;padding:12px 14px;border-radius:12px;background:#fff1f2;color:#9f1239;font-size:.9rem;font-weight:500}
+.error.show{display:block}
+#results{display:none}
+#results.show{display:block;animation:rise .55s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.banner{border-radius:22px;padding:22px 20px;background:var(--accent);color:var(--ink);box-shadow:0 18px 40px rgba(10,10,60,.28);margin-bottom:16px;transition:background .5s}
+.banner .big{font-size:2.6rem;font-weight:700;line-height:1.1}
+.banner .big span{font-size:1rem;font-weight:500;opacity:.8;margin-left:6px}
+.badge{display:inline-block;margin-top:10px;padding:5px 14px;border-radius:99px;font-weight:600;font-size:.95rem;background:rgba(255,255,255,.28);border:1.5px solid currentColor}
+.urgent{display:none;margin-top:14px;padding:12px 14px;border-radius:14px;background:#fff;color:#991b1b;font-weight:600;font-size:.92rem;animation:flash 1.2s infinite}
+.urgent.show{display:block}
+@keyframes flash{50%{box-shadow:0 0 0 6px rgba(255,255,255,.45)}}
+.gauge{margin:6px 0 0}
+.bar{position:relative;display:flex;height:14px;border-radius:99px;overflow:visible}
+.bar i{flex:1}
+.bar i:first-child{border-radius:99px 0 0 99px}.bar i:last-child{border-radius:0 99px 99px 0}
+.marker{position:absolute;top:-7px;width:28px;height:28px;margin-left:-14px;border-radius:50%;background:var(--card);border:5px solid var(--accent);box-shadow:0 3px 8px rgba(0,0,0,.3);transition:left .9s cubic-bezier(.3,1.4,.5,1)}
+.labels{display:flex;margin-top:12px;font-size:.66rem;color:var(--muted);text-align:center}
+.labels span{flex:1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.mini{background:var(--card);border-radius:18px;padding:16px;border-left:6px solid var(--c);box-shadow:0 10px 24px rgba(10,10,60,.22)}
+.mini h3{margin:0;font-size:.82rem;color:var(--muted);font-weight:600}
+.mini .v{font-size:1.6rem;font-weight:700;line-height:1.2}
+.mini .v small{font-size:.75rem;color:var(--muted);font-weight:500}
+.tag{display:inline-block;font-size:.74rem;font-weight:600;padding:2px 10px;border-radius:99px;background:var(--c);color:var(--ci,#fff);margin:4px 0 6px}
+.mini p{margin:0;font-size:.82rem;color:var(--muted)}
+h2{margin:0 0 8px;font-size:1.05rem}
+.card p{margin:0}
+.tips{margin:0;padding:0;list-style:none}
+.tips li{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:.92rem}
+.tips li:first-child{border-top:0}
+.tips li::before{content:"";flex:none;width:10px;height:10px;margin-top:7px;border-radius:50%;background:var(--accent)}
+details summary{cursor:pointer;font-weight:600;font-size:1.02rem;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details summary::after{content:"+";font-size:1.4rem;color:var(--muted);transition:transform .25s}
+details[open] summary::after{transform:rotate(45deg)}
+.scroll{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:420px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.log-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:.9rem}
+.log-row:first-child{border-top:0}
+.log-row .when{flex:1;color:var(--muted);font-size:.78rem}
+.log-row b{font-size:1rem}
+.chip{font-size:.72rem;font-weight:600;padding:2px 10px;border-radius:99px;background:var(--c);color:var(--ci,#fff);white-space:nowrap}
+.empty{color:var(--muted);font-size:.9rem}
+.linkbtn{background:none;padding:0;color:var(--muted);font-size:.82rem;font-weight:500;text-decoration:underline;margin-top:8px}
+.disclaimer{color:#fff;opacity:.85;font-size:.78rem;text-align:center;margin-top:8px}
+@media (max-width:420px){.field input{font-size:1.35rem}.grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-  <div class="container">
-    <header class="app-header">
-      <div class="logo-badge">
-        <span class="heart-icon" aria-hidden="true">&#9829;</span>
-        <span>CardioCheck</span>
+<div class="glow"></div>
+<main>
+  <header>
+    <svg class="heart" id="heart" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 56S6 40 6 22C6 13 13 7 21 7c5 0 9 3 11 7 2-4 6-7 11-7 8 0 15 6 15 15 0 18-26 34-26 34z" fill="#fb7185"/>
+      <path class="ecg" d="M12 31h13l4-9 6 18 4-9h13" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h1>BP &amp; Pulse Meter</h1>
+    <p>Enter your reading to see what it means.</p>
+  </header>
+
+  <section class="card" aria-label="Enter your reading">
+    <div class="inputs">
+      <div class="field">
+        <label for="sys"><svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>SYS</label>
+        <input id="sys" type="number" inputmode="numeric" placeholder="120" aria-describedby="sysh">
+        <small id="sysh">Upper · mmHg</small>
       </div>
-      <h1>Blood Pressure &amp; Pulse Evaluator</h1>
-      <p class="subtitle">
-        Enter your <strong>SYS</strong> (Systolic), <strong>DIA</strong> (Diastolic), and <strong>PULSE</strong> readings from your BP monitor to get a complete, easy-to-understand breakdown.
-      </p>
-    </header>
-
-    <main>
-      <!-- Pre-measurement tip banner -->
-      <div class="prep-banner">
-        <strong>Before you measure:</strong> Sit quietly for 5 minutes with your back supported, feet flat on the floor, and arm resting at heart level.
+      <div class="field">
+        <label for="dia"><svg viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>DIA</label>
+        <input id="dia" type="number" inputmode="numeric" placeholder="80" aria-describedby="diah">
+        <small id="diah">Lower · mmHg</small>
       </div>
+      <div class="field">
+        <label for="pulse"><svg viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>PULSE</label>
+        <input id="pulse" type="number" inputmode="numeric" placeholder="72" aria-describedby="ph">
+        <small id="ph">Heart rate · BPM</small>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="primary" id="go">Evaluate My Reading</button>
+      <button class="ghost" id="reset">Reset</button>
+    </div>
+    <div class="error" id="err" role="alert"></div>
+  </section>
 
-      <!-- Input Card -->
-      <section class="card input-card" aria-labelledby="input-heading">
-        <h2 id="input-heading" class="section-title">Enter Monitor Readings</h2>
-        <form id="bp-form" novalidate>
-          <div class="input-grid">
-            <div class="input-group">
-              <label for="sys">
-                <span class="label-main">SYS <small>(Systolic)</small></span>
-                <span class="label-unit">mmHg &bull; Top Number</span>
-              </label>
-              <input
-                type="number"
-                id="sys"
-                name="sys"
-                placeholder="120"
-                min="40"
-                max="300"
-                required
-                inputmode="numeric"
-              />
-            </div>
+  <div id="results" aria-live="polite">
+    <section class="banner">
+      <div class="big"><span id="rb" style="margin:0;font-size:inherit;font-weight:inherit;opacity:1"></span><span id="rp"></span></div>
+      <div class="badge" id="rs"></div>
+      <div class="urgent" id="urg">Urgent: a reading above 180/120 needs prompt medical attention. Rest for five minutes and measure again. If it stays this high, or you have chest pain, breathlessness, a severe headache, weakness or trouble speaking, call your local emergency number now.</div>
+    </section>
 
-            <div class="input-group">
-              <label for="dia">
-                <span class="label-main">DIA <small>(Diastolic)</small></span>
-                <span class="label-unit">mmHg &bull; Bottom Number</span>
-              </label>
-              <input
-                type="number"
-                id="dia"
-                name="dia"
-                placeholder="80"
-                min="30"
-                max="200"
-                required
-                inputmode="numeric"
-              />
-            </div>
+    <section class="card">
+      <div class="gauge">
+        <div class="bar" id="bar"></div>
+        <div class="labels"><span>Low</span><span>Normal</span><span>Elevated</span><span>Stage 1</span><span>Stage 2</span><span>Crisis</span></div>
+      </div>
+    </section>
 
-            <div class="input-group">
-              <label for="pulse">
-                <span class="label-main">PULSE <small>(Heart Rate)</small></span>
-                <span class="label-unit">BPM &bull; Beats/Min</span>
-              </label>
-              <input
-                type="number"
-                id="pulse"
-                name="pulse"
-                placeholder="72"
-                min="30"
-                max="250"
-                required
-                inputmode="numeric"
-              />
-            </div>
-          </div>
+    <div class="grid" id="cards"></div>
 
-          <div id="error-box" class="error-box hidden" role="alert"></div>
-
-          <div class="button-row">
-            <button type="submit" class="btn btn-primary">Evaluate Full Reading</button>
-            <button type="button" id="reset-btn" class="btn btn-secondary">Clear</button>
-          </div>
-        </form>
-      </section>
-
-      <!-- Results Section -->
-      <section id="results-section" class="results-wrapper hidden" aria-live="polite">
-        <!-- Emergency Alert Banner (Only shown for Crisis / Severe values) -->
-        <div id="emergency-alert" class="emergency-alert hidden">
-          <strong>Urgent Medical Notice:</strong> Your reading is in a critical range. If you are experiencing chest pain, shortness of breath, numbness/weakness, vision changes, or severe headache, seek emergency medical care immediately.
-        </div>
-
-        <!-- Primary Summary Card -->
-        <div id="bp-result-card" class="card result-card">
-          <div class="result-header">
-            <div>
-              <span class="eyebrow">Blood Pressure Classification</span>
-              <h2 id="bp-category-title" class="category-title">—</h2>
-            </div>
-            <div class="reading-pill" id="reading-summary-pill">120 / 80 mmHg</div>
-          </div>
-
-          <!-- Visual Spectrum Gauge -->
-          <div class="gauge-container">
-            <div class="gauge-bar">
-              <div class="gauge-seg seg-low" title="Low"></div>
-              <div class="gauge-seg seg-normal" title="Normal"></div>
-              <div class="gauge-seg seg-elevated" title="Elevated"></div>
-              <div class="gauge-seg seg-stage1" title="Stage 1"></div>
-              <div class="gauge-seg seg-stage2" title="Stage 2"></div>
-              <div class="gauge-seg seg-crisis" title="Crisis"></div>
-            </div>
-            <div id="gauge-marker" class="gauge-marker" style="left: 25%;">
-              <span class="marker-dot"></span>
-              <span class="marker-label">You</span>
-            </div>
-            <div class="gauge-labels">
-              <span>Low</span>
-              <span>Normal</span>
-              <span>Elevated</span>
-              <span>Stage 1</span>
-              <span>Stage 2</span>
-              <span>Crisis</span>
-            </div>
-          </div>
-
-          <p id="bp-explanation" class="explanation-text"></p>
-        </div>
-
-        <!-- Detailed Metrics Breakdown (SYS, DIA, Pulse, MAP, Pulse Pressure) -->
-        <div class="metrics-grid">
-          <!-- Systolic Breakdown -->
-          <div class="card metric-card">
-            <div class="metric-top">
-              <span class="metric-name">SYS (Systolic)</span>
-              <span id="sys-badge" class="mini-badge">—</span>
-            </div>
-            <div class="metric-value"><span id="sys-val">—</span> <small>mmHg</small></div>
-            <p id="sys-desc" class="metric-desc"></p>
-          </div>
-
-          <!-- Diastolic Breakdown -->
-          <div class="card metric-card">
-            <div class="metric-top">
-              <span class="metric-name">DIA (Diastolic)</span>
-              <span id="dia-badge" class="mini-badge">—</span>
-            </div>
-            <div class="metric-value"><span id="dia-val">—</span> <small>mmHg</small></div>
-            <p id="dia-desc" class="metric-desc"></p>
-          </div>
-
-          <!-- Pulse Breakdown -->
-          <div class="card metric-card">
-            <div class="metric-top">
-              <span class="metric-name">PULSE (Heart Rate)</span>
-              <span id="pulse-badge" class="mini-badge">—</span>
-            </div>
-            <div class="metric-value"><span id="pulse-val">—</span> <small>BPM</small></div>
-            <p id="pulse-desc" class="metric-desc"></p>
-          </div>
-
-          <!-- Derived Clinical Metrics: Pulse Pressure & MAP -->
-          <div class="card metric-card">
-            <div class="metric-top">
-              <span class="metric-name">Pulse Pressure &amp; MAP</span>
-              <span id="derived-badge" class="mini-badge">Calculated</span>
-            </div>
-            <div class="metric-value-dual">
-              <div><strong>PP:</strong> <span id="pp-val">—</span> mmHg</div>
-              <div><strong>MAP:</strong> <span id="map-val">—</span> mmHg</div>
-            </div>
-            <p id="derived-desc" class="metric-desc"></p>
-          </div>
-        </div>
-
-        <!-- Actionable Recommendations -->
-        <div class="card tips-card">
-          <h3 class="section-title">What You Should Do Next &amp; Health Tips</h3>
-          <ul id="tips-list" class="tips-list"></ul>
-        </div>
-      </section>
-
-      <!-- Reference Table -->
-      <section class="card reference-card">
-        <details>
-          <summary class="reference-summary">View Standard Blood Pressure &amp; Pulse Reference Chart</summary>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>SYS (mmHg)</th>
-                  <th>Logic</th>
-                  <th>DIA (mmHg)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="row-low">
-                  <td><strong>Low (Hypotension)</strong></td>
-                  <td>Below 90</td>
-                  <td>OR</td>
-                  <td>Below 60</td>
-                </tr>
-                <tr class="row-normal">
-                  <td><strong>Normal</strong></td>
-                  <td>90 – 119</td>
-                  <td>AND</td>
-                  <td>60 – 79</td>
-                </tr>
-                <tr class="row-elevated">
-                  <td><strong>Elevated</strong></td>
-                  <td>120 – 129</td>
-                  <td>AND</td>
-                  <td>Below 80</td>
-                </tr>
-                <tr class="row-stage1">
-                  <td><strong>High BP (Stage 1)</strong></td>
-                  <td>130 – 139</td>
-                  <td>OR</td>
-                  <td>80 – 89</td>
-                </tr>
-                <tr class="row-stage2">
-                  <td><strong>High BP (Stage 2)</strong></td>
-                  <td>140 – 180</td>
-                  <td>OR</td>
-                  <td>90 – 120</td>
-                </tr>
-                <tr class="row-crisis">
-                  <td><strong>Hypertensive Crisis</strong></td>
-                  <td>Higher than 180</td>
-                  <td>OR</td>
-                  <td>Higher than 120</td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="pulse-ref-note">
-              <strong>Normal Resting Adult Pulse:</strong> 60 – 100 BPM (Beats Per Minute). Below 60 BPM is Bradycardia (can be normal in athletes); above 100 BPM at rest is Tachycardia.
-            </p>
-          </div>
-        </details>
-      </section>
-
-      <!-- Recent History Log (Local Storage) -->
-      <section class="card history-card">
-        <div class="history-header">
-          <h3 class="section-title">Recent Readings Log</h3>
-          <button type="button" id="clear-history-btn" class="btn-text">Clear History</button>
-        </div>
-        <div id="history-container">
-          <p class="empty-history">No readings saved yet. Your evaluated readings will appear here automatically on this device.</p>
-        </div>
-      </section>
-    </main>
-
-    <footer class="disclaimer">
-      <strong>Medical Disclaimer:</strong> This tool uses standard clinical blood pressure guidelines (AHA/ACC) for educational and informational purposes only. It is not a medical diagnosis. Always consult a qualified doctor regarding your blood pressure and heart rate readings.
-    </footer>
+    <section class="card"><h2>What this means</h2><p id="expl"></p></section>
+    <section class="card"><h2>Your next steps</h2><ul class="tips" id="tips"></ul></section>
   </div>
 
-  <script src="script.js"></script>
+  <section class="card">
+    <details>
+      <summary>Standard BP &amp; Pulse Reference Chart</summary>
+      <div class="scroll">
+        <table>
+          <tr><th>Category (AHA)</th><th>SYS</th><th></th><th>DIA</th></tr>
+          <tr><td><span class="dot" style="background:#38bdf8"></span>Low</td><td>below 90</td><td>or</td><td>below 60</td></tr>
+          <tr><td><span class="dot" style="background:#10b981"></span>Normal</td><td>below 120</td><td>and</td><td>below 80</td></tr>
+          <tr><td><span class="dot" style="background:#f59e0b"></span>Elevated</td><td>120–129</td><td>and</td><td>below 80</td></tr>
+          <tr><td><span class="dot" style="background:#ff7a45"></span>High (Stage 1)</td><td>130–139</td><td>or</td><td>80–89</td></tr>
+          <tr><td><span class="dot" style="background:#e11d48"></span>High (Stage 2)</td><td>140 or more</td><td>or</td><td>90 or more</td></tr>
+          <tr><td><span class="dot" style="background:#b91c1c"></span>Hypertensive Crisis</td><td>above 180</td><td>and/or</td><td>above 120</td></tr>
+        </table>
+        <table style="margin-top:14px">
+          <tr><th>Resting pulse</th><th>Range</th></tr>
+          <tr><td>Low (bradycardia)</td><td>below 60 BPM</td></tr>
+          <tr><td>Normal</td><td>60–100 BPM</td></tr>
+          <tr><td>High (tachycardia)</td><td>above 100 BPM</td></tr>
+        </table>
+        <p style="font-size:.78rem;color:var(--muted);margin-top:10px">Low BP has no single official cut-off; below 90/60 is the common guide. Pulse pressure is typically 30–50, and MAP typically 70–100.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>Recent Readings Log</h2>
+    <div id="log"></div>
+    <button class="linkbtn" id="clearLog">Clear log</button>
+  </section>
+
+  <p class="disclaimer">This tool is for information only and is not a substitute for professional medical advice, diagnosis or treatment. A single reading doesn’t diagnose anything. Talk to a doctor about your numbers, and seek emergency care for severe symptoms.</p>
+</main>
+
+<script>
+(function(){
+  var S={
+    low:{n:'Low',c:'#38bdf8',i:'#06283d',r:0},
+    normal:{n:'Normal',c:'#10b981',i:'#04281c',r:1},
+    elevated:{n:'Elevated',c:'#f59e0b',i:'#3a2400',r:2},
+    s1:{n:'High (Stage 1)',c:'#ff7a45',i:'#3b1300',r:3},
+    s2:{n:'High (Stage 2)',c:'#e11d48',i:'#fff',r:4},
+    crisis:{n:'Hypertensive Crisis',c:'#b91c1c',i:'#fff',r:5}
+  };
+  var ORDER=['low','normal','elevated','s1','s2','crisis'];
+  var $=function(id){return document.getElementById(id)};
+  var root=document.documentElement;
+
+  function sysCat(s){return s>180?'crisis':s>=140?'s2':s>=130?'s1':s>=120?'elevated':s<90?'low':'normal'}
+  function diaCat(d){return d>120?'crisis':d>=90?'s2':d>=80?'s1':d<60?'low':'normal'}
+  function overall(s,d){
+    var a=sysCat(s),b=diaCat(d),r=Math.max(S[a].r,S[b].r);
+    if(r<=1)return(a==='low'||b==='low')?'low':'normal';
+    return ORDER[r];
+  }
+  var SYS_TXT={
+    low:'Your top number is lower than usual. The heart may be pushing out blood with less force than your body likes.',
+    normal:'Your top number is in the healthy range. Your heart is pumping with a comfortable amount of force.',
+    elevated:'Your top number is a little above ideal. The heart is pushing slightly harder than needed.',
+    s1:'Your top number is high. Your heart is working against more resistance than is ideal.',
+    s2:'Your top number is clearly high. Your heart and arteries are under strong pressure with each beat.',
+    crisis:'Your top number is dangerously high. This needs medical attention.'
+  };
+  var DIA_TXT={
+    low:'Your bottom number is low. Your arteries may be relaxing more than usual between beats.',
+    normal:'Your bottom number is healthy. Your vessels are relaxing well between beats.',
+    s1:'Your bottom number is raised. Your vessels aren’t fully relaxing between beats.',
+    s2:'Your bottom number is clearly high. Your vessels stay under strain even while the heart rests.',
+    crisis:'Your bottom number is dangerously high. This needs medical attention.'
+  };
+  var EXPL={
+    low:'Your pressure is on the low side. For many people that is normal and harmless, especially if you feel fine. If you feel dizzy, faint or unusually tired, it is worth mentioning to a doctor.',
+    normal:'Great news: both numbers sit in the healthy range. Your heart is pumping well and your blood vessels are under a comfortable load. Keep up the habits that got you here.',
+    elevated:'Your pressure is slightly above ideal but not yet in the high range. This is an early nudge, not a diagnosis. Small lifestyle changes now can bring it back down and keep it from climbing.',
+    s1:'Your pressure is in the Stage 1 high range. Your heart has to push a bit harder than it should. A single reading isn’t a diagnosis, but repeated readings like this are worth discussing with a doctor.',
+    s2:'Your pressure is in the Stage 2 high range, which strains your heart and blood vessels over time. Repeat the reading after resting, and book a visit with a doctor soon to talk about a plan.',
+    crisis:'This reading is in the crisis range, which can damage the heart, brain and kidneys quickly. Sit down, rest and re-check in five minutes. If it stays this high, get medical help right away.'
+  };
+  var TIPS={
+    low:['Drink water through the day and add a pinch more salt to meals only if your doctor agrees.','Stand up slowly from sitting or lying down to avoid dizziness.','Eat smaller, more frequent meals instead of large heavy ones.','See a doctor if you faint, feel confused, or have blurred vision.'],
+    normal:['Keep moving: aim for about 150 minutes of brisk activity a week.','Favour fruit, vegetables, whole grains and low-salt foods.','Sleep 7–9 hours and keep stress in check.','Re-check every few months, or once a year if you’re healthy.'],
+    elevated:['Cut back on salty and processed foods, and aim for under 2,300 mg of sodium a day.','Walk briskly for 30 minutes on most days.','Limit alcohol, and avoid tobacco in any form.','Check again at the same time each day for a week and note the trend.'],
+    s1:['Reduce salt, and add potassium-rich foods such as bananas, spinach and beans.','Aim for 30 minutes of daily activity and a healthy weight.','Practise slow breathing for 5 minutes to ease stress.','Book a doctor visit and bring a week of home readings.'],
+    s2:['Book a doctor appointment soon and take your home readings with you.','Cut salt sharply and avoid processed and fried foods.','Take any prescribed medicine exactly as directed. Don’t stop it on your own.','Rest for 5 minutes, then re-measure sitting, feet flat, arm at heart level.'],
+    crisis:['Rest quietly and re-measure after 5 minutes.','If it is still above 180/120, seek urgent medical care.','Call emergency services at once if you have chest pain, breathlessness, weakness or a severe headache.','Don’t drive yourself if you feel unwell. Ask someone to take you.']
+  };
+
+  function pulseCat(p){return p<60?{n:'Low / Bradycardia',k:'low',t:'Your heart beats slower than 60 times a minute. Fit and active people often run this low without problems. If you feel dizzy or faint, see a doctor.'}:
+    p>100?{n:'High / Tachycardia',k:'s1',t:'Your heart beats faster than 100 times a minute. Exercise, caffeine, stress, fever or dehydration can cause this. If it stays high at rest, check with a doctor.'}:
+    {n:'Normal',k:'normal',t:'Your resting heart rate is in the healthy 60–100 BPM range.'}}
+  function ppCat(pp){return pp<30?{n:'Narrow',k:'low',t:'The gap between your numbers is small. Often harmless, but worth mentioning to a doctor if it stays this narrow.'}:
+    pp>50?{n:'Wide',k:'elevated',t:'The gap is wider than typical. This can reflect stiffer arteries and is worth tracking over time.'}:
+    {n:'Normal',k:'normal',t:'Pulse pressure is the gap between top and bottom numbers. Yours is in the typical 30–50 range.'}}
+  function mapCat(m){return m<70?{n:'Low',k:'low',t:'Mean pressure is below 70. Organs may get less blood flow than ideal, so check with a doctor if you feel unwell.'}:
+    m>100?{n:'High',k:'s1',t:'Mean pressure is above 100, meaning your average load on the arteries is high.'}:
+    {n:'Normal',k:'normal',t:'Mean arterial pressure is your average pressure through a heartbeat. 70–100 is enough to nourish your organs.'}}
+
+  function mini(title,val,unit,cat,txt){
+    var s=S[cat.k||cat];
+    return '<div class="mini" style="--c:'+s.c+';--ci:'+s.i+'"><h3>'+title+'</h3><div class="v">'+val+' <small>'+unit+'</small></div><span class="tag">'+(cat.n||s.n)+'</span><p>'+txt+'</p></div>';
+  }
+
+  // gauge bar
+  $('bar').innerHTML=ORDER.map(function(k){return '<i style="background:'+S[k].c+'"></i>'}).join('')+'<div class="marker" id="mk" style="left:8.33%"></div>';
+
+  function setError(m){var e=$('err');e.textContent=m;e.classList.toggle('show',!!m)}
+
+  function evaluate(){
+    var s=$('sys').value.trim(),d=$('dia').value.trim(),p=$('pulse').value.trim();
+    if(!s||!d||!p){return setError('Please fill in all three fields: SYS, DIA and PULSE.')}
+    s=Number(s);d=Number(d);p=Number(p);
+    if(!isFinite(s)||!isFinite(d)||!isFinite(p)||s%1||d%1||p%1){return setError('Please enter whole numbers only.')}
+    if(s<50||s>260){return setError('SYS looks unusual. Enter a value between 50 and 260 mmHg.')}
+    if(d<30||d>160){return setError('DIA looks unusual. Enter a value between 30 and 160 mmHg.')}
+    if(p<25||p>220){return setError('PULSE looks unusual. Enter a value between 25 and 220 BPM.')}
+    if(s<=d){return setError('SYS (top number) must be higher than DIA (bottom number). Check that you haven’t swapped them.')}
+    setError('');
+
+    var k=overall(s,d),st=S[k],pp=s-d,mp=Math.round((s+2*d)/3);
+    root.style.setProperty('--accent',st.c);root.style.setProperty('--ink',st.i);
+    document.body.classList.add('has-result');
+    $('rb').textContent=s+'/'+d;$('rp').textContent='mmHg · '+p+' BPM';
+    $('rs').textContent=st.n;
+    $('urg').classList.toggle('show',s>180||d>120);
+    $('cards').innerHTML=
+      mini('SYS · pumping pressure',s,'mmHg',sysCat(s),SYS_TXT[sysCat(s)])+
+      mini('DIA · resting pressure',d,'mmHg',diaCat(d),DIA_TXT[diaCat(d)])+
+      mini('Pulse',p,'BPM',pulseCat(p),pulseCat(p).t)+
+      mini('Pulse pressure',pp,'mmHg',ppCat(pp),ppCat(pp).t)+
+      mini('Mean arterial pressure',mp,'mmHg',mapCat(mp),mapCat(mp).t);
+    $('expl').textContent=EXPL[k];
+    $('tips').innerHTML=TIPS[k].map(function(t){return '<li>'+t+'</li>'}).join('');
+    $('heart').style.setProperty('--beat',Math.max(.35,Math.min(2.4,60/p)).toFixed(2)+'s');
+    $('heart').parentNode.style.setProperty('--beat',Math.max(.35,Math.min(2.4,60/p)).toFixed(2)+'s');
+    var res=$('results');res.classList.remove('show');void res.offsetWidth;res.classList.add('show');
+    $('mk').style.left=(S[k].r*100/6+100/12)+'%';
+    res.scrollIntoView({behavior:'smooth',block:'start'});
+    saveLog({t:Date.now(),s:s,d:d,p:p,k:k});
+  }
+
+  function reset(){
+    ['sys','dia','pulse'].forEach(function(i){$(i).value=''});
+    setError('');$('results').classList.remove('show');
+    document.body.classList.remove('has-result');
+    root.style.removeProperty('--accent');root.style.removeProperty('--ink');
+    $('heart').style.removeProperty('--beat');
+    $('sys').focus();
+  }
+
+  // log
+  var KEY='bpMeterLog';
+  function loadLog(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return memLog}}
+  var memLog=[];
+  function saveLog(entry){
+    var l=loadLog();l.unshift(entry);l=l.slice(0,8);memLog=l;
+    try{localStorage.setItem(KEY,JSON.stringify(l))}catch(e){}
+    renderLog();
+  }
+  function renderLog(){
+    var l=loadLog();
+    $('clearLog').style.display=l.length?'':'none';
+    if(!l.length){$('log').innerHTML='<p class="empty">No readings yet. Your last few checks will appear here, saved only in this browser.</p>';return}
+    $('log').innerHTML=l.map(function(e){
+      var s=S[e.k]||S.normal;
+      var when=new Date(e.t).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+      return '<div class="log-row"><div class="when">'+when+'</div><b>'+e.s+'/'+e.d+'</b><span>'+e.p+' BPM</span><span class="chip" style="--c:'+s.c+';--ci:'+s.i+'">'+s.n+'</span></div>';
+    }).join('');
+  }
+  $('clearLog').onclick=function(){memLog=[];try{localStorage.removeItem(KEY)}catch(e){}renderLog()};
+
+  $('go').onclick=evaluate;
+  $('reset').onclick=reset;
+  ['sys','dia','pulse'].forEach(function(i){$(i).addEventListener('keydown',function(e){if(e.key==='Enter')evaluate()})});
+  renderLog();
+})();
+</script>
 </body>
 </html>
