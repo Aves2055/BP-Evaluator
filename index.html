@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BP &amp; Pulse Meter Evaluator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <div class="logo-badge">
+        <span class="heart-icon" aria-hidden="true">&#9829;</span>
+        <span>CardioCheck</span>
+      </div>
+      <h1>Blood Pressure &amp; Pulse Evaluator</h1>
+      <p class="subtitle">
+        Enter your <strong>SYS</strong> (Systolic), <strong>DIA</strong> (Diastolic), and <strong>PULSE</strong> readings from your BP monitor to get a complete, easy-to-understand breakdown.
+      </p>
+    </header>
+
+    <main>
+      <!-- Pre-measurement tip banner -->
+      <div class="prep-banner">
+        <strong>Before you measure:</strong> Sit quietly for 5 minutes with your back supported, feet flat on the floor, and arm resting at heart level.
+      </div>
+
+      <!-- Input Card -->
+      <section class="card input-card" aria-labelledby="input-heading">
+        <h2 id="input-heading" class="section-title">Enter Monitor Readings</h2>
+        <form id="bp-form" novalidate>
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="sys">
+                <span class="label-main">SYS <small>(Systolic)</small></span>
+                <span class="label-unit">mmHg &bull; Top Number</span>
+              </label>
+              <input
+                type="number"
+                id="sys"
+                name="sys"
+                placeholder="120"
+                min="40"
+                max="300"
+                required
+                inputmode="numeric"
+              />
+            </div>
+
+            <div class="input-group">
+              <label for="dia">
+                <span class="label-main">DIA <small>(Diastolic)</small></span>
+                <span class="label-unit">mmHg &bull; Bottom Number</span>
+              </label>
+              <input
+                type="number"
+                id="dia"
+                name="dia"
+                placeholder="80"
+                min="30"
+                max="200"
+                required
+                inputmode="numeric"
+              />
+            </div>
+
+            <div class="input-group">
+              <label for="pulse">
+                <span class="label-main">PULSE <small>(Heart Rate)</small></span>
+                <span class="label-unit">BPM &bull; Beats/Min</span>
+              </label>
+              <input
+                type="number"
+                id="pulse"
+                name="pulse"
+                placeholder="72"
+                min="30"
+                max="250"
+                required
+                inputmode="numeric"
+              />
+            </div>
+          </div>
+
+          <div id="error-box" class="error-box hidden" role="alert"></div>
+
+          <div class="button-row">
+            <button type="submit" class="btn btn-primary">Evaluate Full Reading</button>
+            <button type="button" id="reset-btn" class="btn btn-secondary">Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Results Section -->
+      <section id="results-section" class="results-wrapper hidden" aria-live="polite">
+        <!-- Emergency Alert Banner (Only shown for Crisis / Severe values) -->
+        <div id="emergency-alert" class="emergency-alert hidden">
+          <strong>Urgent Medical Notice:</strong> Your reading is in a critical range. If you are experiencing chest pain, shortness of breath, numbness/weakness, vision changes, or severe headache, seek emergency medical care immediately.
+        </div>
+
+        <!-- Primary Summary Card -->
+        <div id="bp-result-card" class="card result-card">
+          <div class="result-header">
+            <div>
+              <span class="eyebrow">Blood Pressure Classification</span>
+              <h2 id="bp-category-title" class="category-title">—</h2>
+            </div>
+            <div class="reading-pill" id="reading-summary-pill">120 / 80 mmHg</div>
+          </div>
+
+          <!-- Visual Spectrum Gauge -->
+          <div class="gauge-container">
+            <div class="gauge-bar">
+              <div class="gauge-seg seg-low" title="Low"></div>
+              <div class="gauge-seg seg-normal" title="Normal"></div>
+              <div class="gauge-seg seg-elevated" title="Elevated"></div>
+              <div class="gauge-seg seg-stage1" title="Stage 1"></div>
+              <div class="gauge-seg seg-stage2" title="Stage 2"></div>
+              <div class="gauge-seg seg-crisis" title="Crisis"></div>
+            </div>
+            <div id="gauge-marker" class="gauge-marker" style="left: 25%;">
+              <span class="marker-dot"></span>
+              <span class="marker-label">You</span>
+            </div>
+            <div class="gauge-labels">
+              <span>Low</span>
+              <span>Normal</span>
+              <span>Elevated</span>
+              <span>Stage 1</span>
+              <span>Stage 2</span>
+              <span>Crisis</span>
+            </div>
+          </div>
+
+          <p id="bp-explanation" class="explanation-text"></p>
+        </div>
+
+        <!-- Detailed Metrics Breakdown (SYS, DIA, Pulse, MAP, Pulse Pressure) -->
+        <div class="metrics-grid">
+          <!-- Systolic Breakdown -->
+          <div class="card metric-card">
+            <div class="metric-top">
+              <span class="metric-name">SYS (Systolic)</span>
+              <span id="sys-badge" class="mini-badge">—</span>
+            </div>
+            <div class="metric-value"><span id="sys-val">—</span> <small>mmHg</small></div>
+            <p id="sys-desc" class="metric-desc"></p>
+          </div>
+
+          <!-- Diastolic Breakdown -->
+          <div class="card metric-card">
+            <div class="metric-top">
+              <span class="metric-name">DIA (Diastolic)</span>
+              <span id="dia-badge" class="mini-badge">—</span>
+            </div>
+            <div class="metric-value"><span id="dia-val">—</span> <small>mmHg</small></div>
+            <p id="dia-desc" class="metric-desc"></p>
+          </div>
+
+          <!-- Pulse Breakdown -->
+          <div class="card metric-card">
+            <div class="metric-top">
+              <span class="metric-name">PULSE (Heart Rate)</span>
+              <span id="pulse-badge" class="mini-badge">—</span>
+            </div>
+            <div class="metric-value"><span id="pulse-val">—</span> <small>BPM</small></div>
+            <p id="pulse-desc" class="metric-desc"></p>
+          </div>
+
+          <!-- Derived Clinical Metrics: Pulse Pressure & MAP -->
+          <div class="card metric-card">
+            <div class="metric-top">
+              <span class="metric-name">Pulse Pressure &amp; MAP</span>
+              <span id="derived-badge" class="mini-badge">Calculated</span>
+            </div>
+            <div class="metric-value-dual">
+              <div><strong>PP:</strong> <span id="pp-val">—</span> mmHg</div>
+              <div><strong>MAP:</strong> <span id="map-val">—</span> mmHg</div>
+            </div>
+            <p id="derived-desc" class="metric-desc"></p>
+          </div>
+        </div>
+
+        <!-- Actionable Recommendations -->
+        <div class="card tips-card">
+          <h3 class="section-title">What You Should Do Next &amp; Health Tips</h3>
+          <ul id="tips-list" class="tips-list"></ul>
+        </div>
+      </section>
+
+      <!-- Reference Table -->
+      <section class="card reference-card">
+        <details>
+          <summary class="reference-summary">View Standard Blood Pressure &amp; Pulse Reference Chart</summary>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>SYS (mmHg)</th>
+                  <th>Logic</th>
+                  <th>DIA (mmHg)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="row-low">
+                  <td><strong>Low (Hypotension)</strong></td>
+                  <td>Below 90</td>
+                  <td>OR</td>
+                  <td>Below 60</td>
+                </tr>
+                <tr class="row-normal">
+                  <td><strong>Normal</strong></td>
+                  <td>90 – 119</td>
+                  <td>AND</td>
+                  <td>60 – 79</td>
+                </tr>
+                <tr class="row-elevated">
+                  <td><strong>Elevated</strong></td>
+                  <td>120 – 129</td>
+                  <td>AND</td>
+                  <td>Below 80</td>
+                </tr>
+                <tr class="row-stage1">
+                  <td><strong>High BP (Stage 1)</strong></td>
+                  <td>130 – 139</td>
+                  <td>OR</td>
+                  <td>80 – 89</td>
+                </tr>
+                <tr class="row-stage2">
+                  <td><strong>High BP (Stage 2)</strong></td>
+                  <td>140 – 180</td>
+                  <td>OR</td>
+                  <td>90 – 120</td>
+                </tr>
+                <tr class="row-crisis">
+                  <td><strong>Hypertensive Crisis</strong></td>
+                  <td>Higher than 180</td>
+                  <td>OR</td>
+                  <td>Higher than 120</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="pulse-ref-note">
+              <strong>Normal Resting Adult Pulse:</strong> 60 – 100 BPM (Beats Per Minute). Below 60 BPM is Bradycardia (can be normal in athletes); above 100 BPM at rest is Tachycardia.
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <!-- Recent History Log (Local Storage) -->
+      <section class="card history-card">
+        <div class="history-header">
+          <h3 class="section-title">Recent Readings Log</h3>
+          <button type="button" id="clear-history-btn" class="btn-text">Clear History</button>
+        </div>
+        <div id="history-container">
+          <p class="empty-history">No readings saved yet. Your evaluated readings will appear here automatically on this device.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="disclaimer">
+      <strong>Medical Disclaimer:</strong> This tool uses standard clinical blood pressure guidelines (AHA/ACC) for educational and informational purposes only. It is not a medical diagnosis. Always consult a qualified doctor regarding your blood pressure and heart rate readings.
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
