@@ -26,10 +26,16 @@ main{position:relative;max-width:760px;margin:0 auto;padding:24px 16px 40px}
 header{text-align:center;color:#fff;margin-bottom:20px}
 header h1{margin:8px 0 2px;font-size:1.7rem;font-weight:700}
 header p{margin:0;opacity:.85;font-size:.95rem}
-.heart{width:64px;height:64px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.3));animation:beat var(--beat,1s) infinite ease-in-out;transform-origin:center}
-@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.1)}60%{transform:scale(1)}}
-.ecg{stroke-dasharray:60;stroke-dashoffset:60;animation:ecg var(--beat,1s) infinite linear}
-@keyframes ecg{0%{stroke-dashoffset:60}60%,100%{stroke-dashoffset:0}}
+.hero{position:relative;width:170px;height:170px;margin:0 auto}
+.ring{position:absolute;inset:20px;border-radius:50%;border:3px solid rgba(255,255,255,.55);animation:ring var(--beat,.85s) ease-out infinite}
+.ring.r2{animation-delay:calc(var(--beat,.85s)*.5)}
+@keyframes ring{0%{transform:scale(.7);opacity:.8}100%{transform:scale(1.55);opacity:0}}
+.hsvg{position:relative;width:100%;height:100%;filter:drop-shadow(0 14px 22px rgba(80,0,20,.55))}
+.pump{transform-origin:100px 115px;animation:lub var(--beat,.85s) infinite}
+@keyframes lub{0%{transform:scale(1)}10%{transform:scale(1.12)}20%{transform:scale(.99)}32%{transform:scale(1.07)}48%,100%{transform:scale(1)}}
+.trace{display:block;width:240px;max-width:80%;height:40px;margin:0 auto}
+.trace path{fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:420;stroke-dashoffset:420;animation:tr calc(var(--beat,.85s)*2) linear infinite;filter:drop-shadow(0 0 4px rgba(255,255,255,.9))}
+@keyframes tr{to{stroke-dashoffset:-420}}
 .card{background:var(--card);border-radius:22px;padding:20px;box-shadow:0 18px 40px rgba(10,10,60,.28);margin-bottom:16px}
 .inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .field label{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:6px}
@@ -93,6 +99,23 @@ th{color:var(--muted);font-weight:600}
 .empty{color:var(--muted);font-size:.9rem}
 .linkbtn{background:none;padding:0;color:var(--muted);font-size:.82rem;font-weight:500;text-decoration:underline;margin-top:8px}
 .disclaimer{color:#fff;opacity:.85;font-size:.78rem;text-align:center;margin-top:8px}
+.extra{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.extra .full{grid-column:1/-1}
+.extra label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:6px}
+.extra input{width:100%;font:500 1rem var(--font);color:var(--text);background:var(--field);border:2px solid transparent;border-radius:14px;padding:12px 14px;outline:none}
+.extra input:focus{border-color:#6366f1}
+.extra small{display:block;color:var(--muted);font-size:.72rem;margin-top:4px}
+.opts{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-top:14px}
+.seg{display:inline-flex;background:var(--field);border-radius:99px;padding:4px}
+.seg button{padding:8px 14px;border-radius:99px;background:transparent;color:var(--muted);font-size:.85rem}
+.seg button.on{background:linear-gradient(90deg,#6366f1,#0ea5e9);color:#fff}
+.chk{display:flex;align-items:center;gap:8px;font-size:.88rem;color:var(--muted);cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:#6366f1}
+.who{font-weight:600;margin-top:8px;opacity:.92}
+.verdict{margin-top:10px;font-size:1.15rem;font-weight:700}
+.stamp{margin-top:6px;font-size:.8rem;opacity:.85}
+.tools{display:flex;flex-wrap:wrap;gap:8px}
+.tools button{flex:1;min-width:120px;padding:11px 12px;font-size:.88rem;background:var(--field);color:var(--text)}
 @media (max-width:420px){.field input{font-size:1.35rem}.grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -101,12 +124,23 @@ th{color:var(--muted);font-weight:600}
 <div class="glow"></div>
 <main>
   <header>
-    <svg class="heart" id="heart" viewBox="0 0 64 64" aria-hidden="true">
-      <path d="M32 56S6 40 6 22C6 13 13 7 21 7c5 0 9 3 11 7 2-4 6-7 11-7 8 0 15 6 15 15 0 18-26 34-26 34z" fill="#fb7185"/>
-      <path class="ecg" d="M12 31h13l4-9 6 18 4-9h13" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
+    <div class="hero" aria-hidden="true"><div class="ring"></div><div class="ring r2"></div>
+    <svg class="hsvg" viewBox="0 0 200 200"><defs>
+<radialGradient id="hg" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="#ff9a9a"/><stop offset=".45" stop-color="#e11d48"/><stop offset="1" stop-color="#6b0f24"/></radialGradient>
+<linearGradient id="vg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f87171"/><stop offset="1" stop-color="#9f1239"/></linearGradient></defs>
+<g class="pump">
+<path d="M88 62C84 30 116 14 138 28 150 36 152 50 146 58L132 50C128 42 120 40 114 46 108 52 108 62 108 68Z" fill="url(#vg)"/>
+<path d="M118 60C126 38 156 34 166 54 170 62 168 70 162 74L150 64C148 56 140 54 134 60Z" fill="url(#vg)"/>
+<path d="M82 62C78 44 58 38 46 50 40 56 40 64 46 70L58 62C62 56 68 56 72 64Z" fill="url(#vg)"/>
+<path d="M100 184C38 142 14 104 26 72 36 46 70 38 92 60 98 66 102 68 108 62 130 42 166 50 174 80 182 110 158 144 100 184Z" fill="url(#hg)" stroke="#5a0b1d" stroke-width="2"/>
+<path d="M96 64C84 90 82 120 100 160" fill="none" stroke="#7f0f2a" stroke-width="3" opacity=".45"/>
+<path d="M110 70C128 82 140 104 132 130" fill="none" stroke="#7f0f2a" stroke-width="2.5" opacity=".4"/>
+<ellipse cx="62" cy="86" rx="12" ry="22" transform="rotate(25 62 86)" fill="#fff" opacity=".28"/>
+<ellipse cx="140" cy="76" rx="6" ry="10" transform="rotate(-30 140 76)" fill="#fff" opacity=".18"/>
+</g></svg></div>
+    <svg class="trace" viewBox="0 0 300 40" aria-hidden="true"><path d="M0 22H90l8-5 8 5H130l6 5 9-26 9 32 7-11H210l8-6 10 6H300"/></svg>
     <h1>BP &amp; Pulse Meter</h1>
-    <p>Enter your reading to see what it means.</p>
+    <p>Check your reading, hear the result, and keep a record.</p>
   </header>
 
   <section class="card" aria-label="Enter your reading">
@@ -127,6 +161,16 @@ th{color:var(--muted);font-weight:600}
         <small id="ph">Heart rate · BPM</small>
       </div>
     </div>
+    <div class="extra">
+      <div class="full"><label for="name">Name (optional, for your record)</label><input id="name" type="text" maxlength="30" autocomplete="off" placeholder="e.g. Dad, Ayesha"></div>
+      <div><label for="age">Age (optional)</label><input id="age" type="number" inputmode="numeric" placeholder="e.g. 35"></div>
+      <div><label for="dob">or Date of birth</label><input id="dob" type="date"></div>
+      <div class="full"><small>Age is optional. It adds a personalised note to your result.</small></div>
+    </div>
+    <div class="opts">
+      <div class="seg" id="seg"><button data-l="en" class="on">English</button><button data-l="ur">Roman Urdu</button></div>
+      <label class="chk"><input type="checkbox" id="auto" checked> Speak result aloud</label>
+    </div>
     <div class="actions">
       <button class="primary" id="go">Evaluate My Reading</button>
       <button class="ghost" id="reset">Reset</button>
@@ -137,10 +181,11 @@ th{color:var(--muted);font-weight:600}
   <div id="results" aria-live="polite">
     <section class="banner">
       <div class="big"><span id="rb" style="margin:0;font-size:inherit;font-weight:inherit;opacity:1"></span><span id="rp"></span></div>
-      <div class="badge" id="rs"></div>
+      <div class="who" id="who"></div><div class="badge" id="rs"></div><div class="verdict" id="vd"></div><div class="stamp" id="stamp"></div>
       <div class="urgent" id="urg">Urgent: a reading above 180/120 needs prompt medical attention. Rest for five minutes and measure again. If it stays this high, or you have chest pain, breathlessness, a severe headache, weakness or trouble speaking, call your local emergency number now.</div>
     </section>
 
+    <section class="card tools"><button id="spk"></button><button id="stp"></button><button id="cpy"></button></section>
     <section class="card">
       <div class="gauge">
         <div class="bar" id="bar"></div>
@@ -150,8 +195,9 @@ th{color:var(--muted);font-weight:600}
 
     <div class="grid" id="cards"></div>
 
-    <section class="card"><h2>What this means</h2><p id="expl"></p></section>
-    <section class="card"><h2>Your next steps</h2><ul class="tips" id="tips"></ul></section>
+    <section class="card" id="agecard" style="display:none"></section>
+    <section class="card"><h2 id="hExp">What this means</h2><p id="expl"></p></section>
+    <section class="card"><h2 id="hTips">Your next steps</h2><ul class="tips" id="tips"></ul></section>
   </div>
 
   <section class="card">
@@ -181,7 +227,8 @@ th{color:var(--muted);font-weight:600}
   <section class="card">
     <h2>Recent Readings Log</h2>
     <div id="log"></div>
-    <button class="linkbtn" id="clearLog">Clear log</button>
+    <div id="avg" class="empty" style="margin-top:8px"></div>
+    <div style="display:flex;gap:18px"><button class="linkbtn" id="copyLog">Copy log (CSV)</button><button class="linkbtn" id="clearLog">Clear log</button></div>
   </section>
 
   <p class="disclaimer">This tool is for information only and is not a substitute for professional medical advice, diagnosis or treatment. A single reading doesn’t diagnose anything. Talk to a doctor about your numbers, and seek emergency care for severe symptoms.</p>
@@ -189,144 +236,133 @@ th{color:var(--muted);font-weight:600}
 
 <script>
 (function(){
-  var S={
-    low:{n:'Low',c:'#38bdf8',i:'#06283d',r:0},
-    normal:{n:'Normal',c:'#10b981',i:'#04281c',r:1},
-    elevated:{n:'Elevated',c:'#f59e0b',i:'#3a2400',r:2},
-    s1:{n:'High (Stage 1)',c:'#ff7a45',i:'#3b1300',r:3},
-    s2:{n:'High (Stage 2)',c:'#e11d48',i:'#fff',r:4},
-    crisis:{n:'Hypertensive Crisis',c:'#b91c1c',i:'#fff',r:5}
-  };
-  var ORDER=['low','normal','elevated','s1','s2','crisis'];
-  var $=function(id){return document.getElementById(id)};
-  var root=document.documentElement;
+var $=function(i){return document.getElementById(i)},root=document.documentElement;
+var S={low:{c:'#38bdf8',i:'#06283d',r:0},normal:{c:'#10b981',i:'#04281c',r:1},elevated:{c:'#f59e0b',i:'#3a2400',r:2},s1:{c:'#ff7a45',i:'#3b1300',r:3},s2:{c:'#e11d48',i:'#fff',r:4},crisis:{c:'#b91c1c',i:'#fff',r:5}};
+var ORDER=['low','normal','elevated','s1','s2','crisis'];
+var PC={low:'low',normal:'normal',high:'s1'},PPC={low:'low',normal:'normal',wide:'elevated'};
+var lang='en',last=null,KEY='bpMeterLog',memLog=[],synth=window.speechSynthesis;
 
-  function sysCat(s){return s>180?'crisis':s>=140?'s2':s>=130?'s1':s>=120?'elevated':s<90?'low':'normal'}
-  function diaCat(d){return d>120?'crisis':d>=90?'s2':d>=80?'s1':d<60?'low':'normal'}
-  function overall(s,d){
-    var a=sysCat(s),b=diaCat(d),r=Math.max(S[a].r,S[b].r);
-    if(r<=1)return(a==='low'||b==='low')?'low':'normal';
-    return ORDER[r];
-  }
-  var SYS_TXT={
-    low:'Your top number is lower than usual. The heart may be pushing out blood with less force than your body likes.',
-    normal:'Your top number is in the healthy range. Your heart is pumping with a comfortable amount of force.',
-    elevated:'Your top number is a little above ideal. The heart is pushing slightly harder than needed.',
-    s1:'Your top number is high. Your heart is working against more resistance than is ideal.',
-    s2:'Your top number is clearly high. Your heart and arteries are under strong pressure with each beat.',
-    crisis:'Your top number is dangerously high. This needs medical attention.'
-  };
-  var DIA_TXT={
-    low:'Your bottom number is low. Your arteries may be relaxing more than usual between beats.',
-    normal:'Your bottom number is healthy. Your vessels are relaxing well between beats.',
-    s1:'Your bottom number is raised. Your vessels aren’t fully relaxing between beats.',
-    s2:'Your bottom number is clearly high. Your vessels stay under strain even while the heart rests.',
-    crisis:'Your bottom number is dangerously high. This needs medical attention.'
-  };
-  var EXPL={
-    low:'Your pressure is on the low side. For many people that is normal and harmless, especially if you feel fine. If you feel dizzy, faint or unusually tired, it is worth mentioning to a doctor.',
-    normal:'Great news: both numbers sit in the healthy range. Your heart is pumping well and your blood vessels are under a comfortable load. Keep up the habits that got you here.',
-    elevated:'Your pressure is slightly above ideal but not yet in the high range. This is an early nudge, not a diagnosis. Small lifestyle changes now can bring it back down and keep it from climbing.',
-    s1:'Your pressure is in the Stage 1 high range. Your heart has to push a bit harder than it should. A single reading isn’t a diagnosis, but repeated readings like this are worth discussing with a doctor.',
-    s2:'Your pressure is in the Stage 2 high range, which strains your heart and blood vessels over time. Repeat the reading after resting, and book a visit with a doctor soon to talk about a plan.',
-    crisis:'This reading is in the crisis range, which can damage the heart, brain and kidneys quickly. Sit down, rest and re-check in five minutes. If it stays this high, get medical help right away.'
-  };
-  var TIPS={
-    low:['Drink water through the day and add a pinch more salt to meals only if your doctor agrees.','Stand up slowly from sitting or lying down to avoid dizziness.','Eat smaller, more frequent meals instead of large heavy ones.','See a doctor if you faint, feel confused, or have blurred vision.'],
-    normal:['Keep moving: aim for about 150 minutes of brisk activity a week.','Favour fruit, vegetables, whole grains and low-salt foods.','Sleep 7–9 hours and keep stress in check.','Re-check every few months, or once a year if you’re healthy.'],
-    elevated:['Cut back on salty and processed foods, and aim for under 2,300 mg of sodium a day.','Walk briskly for 30 minutes on most days.','Limit alcohol, and avoid tobacco in any form.','Check again at the same time each day for a week and note the trend.'],
-    s1:['Reduce salt, and add potassium-rich foods such as bananas, spinach and beans.','Aim for 30 minutes of daily activity and a healthy weight.','Practise slow breathing for 5 minutes to ease stress.','Book a doctor visit and bring a week of home readings.'],
-    s2:['Book a doctor appointment soon and take your home readings with you.','Cut salt sharply and avoid processed and fried foods.','Take any prescribed medicine exactly as directed. Don’t stop it on your own.','Rest for 5 minutes, then re-measure sitting, feet flat, arm at heart level.'],
-    crisis:['Rest quietly and re-measure after 5 minutes.','If it is still above 180/120, seek urgent medical care.','Call emergency services at once if you have chest pain, breathlessness, weakness or a severe headache.','Don’t drive yourself if you feel unwell. Ask someone to take you.']
-  };
+var T={
+en:{
+ st:{low:'Low',normal:'Normal',elevated:'Elevated',s1:'High (Stage 1)',s2:'High (Stage 2)',crisis:'Hypertensive Crisis'},
+ vd:{low:'Not normal: lower than usual',normal:'Yes, this is normal',elevated:'Slightly above normal',s1:'Not normal: high',s2:'Not normal: high',crisis:'Not normal: dangerous, act now'},
+ sys:{low:'Your top number is lower than usual. The heart may be pushing out blood with less force than your body likes.',normal:'Your top number is in the healthy range. Your heart is pumping with a comfortable amount of force.',elevated:'Your top number is a little above ideal. The heart is pushing slightly harder than needed.',s1:'Your top number is high. Your heart is working against more resistance than is ideal.',s2:'Your top number is clearly high. Your heart and arteries are under strong pressure with each beat.',crisis:'Your top number is dangerously high. This needs medical attention.'},
+ dia:{low:'Your bottom number is low. Your arteries may be relaxing more than usual between beats.',normal:'Your bottom number is healthy. Your vessels are relaxing well between beats.',s1:'Your bottom number is raised. Your vessels aren’t fully relaxing between beats.',s2:'Your bottom number is clearly high. Your vessels stay under strain even while the heart rests.',crisis:'Your bottom number is dangerously high. This needs medical attention.'},
+ ex:{low:'Your pressure is on the low side. For many people that is normal and harmless, especially if you feel fine. If you feel dizzy, faint or unusually tired, mention it to a doctor.',normal:'Great news: both numbers sit in the healthy range. Your heart is pumping well and your blood vessels are under a comfortable load. Keep up the habits that got you here.',elevated:'Your pressure is slightly above ideal but not yet in the high range. This is an early nudge, not a diagnosis. Small lifestyle changes now can bring it back down.',s1:'Your pressure is in the Stage 1 high range. Your heart has to push a bit harder than it should. A single reading isn’t a diagnosis, but repeated readings like this are worth discussing with a doctor.',s2:'Your pressure is in the Stage 2 high range, which strains your heart and blood vessels over time. Repeat the reading after resting, and see a doctor soon.',crisis:'This reading is in the crisis range, which can damage the heart, brain and kidneys quickly. Sit down, rest and re-check in five minutes. If it stays this high, get medical help right away.'},
+ tips:{low:['Drink water through the day, and add salt only if your doctor agrees.','Stand up slowly from sitting or lying down to avoid dizziness.','Eat smaller, more frequent meals instead of large heavy ones.','See a doctor if you faint, feel confused, or have blurred vision.'],normal:['Keep moving: aim for about 150 minutes of brisk activity a week.','Favour fruit, vegetables, whole grains and low-salt foods.','Sleep 7–9 hours and keep stress in check.','Re-check every few months.'],elevated:['Cut back on salty and processed foods.','Walk briskly for 30 minutes on most days.','Limit alcohol, and avoid tobacco in any form.','Check at the same time each day for a week and note the trend.'],s1:['Reduce salt, and add potassium-rich foods such as bananas, spinach and beans.','Aim for 30 minutes of daily activity and a healthy weight.','Practise slow breathing for 5 minutes to ease stress.','Book a doctor visit and bring a week of home readings.'],s2:['Book a doctor appointment soon and take your home readings.','Cut salt sharply and avoid processed and fried foods.','Take any prescribed medicine exactly as directed. Don’t stop it on your own.','Rest 5 minutes, then re-measure seated, feet flat, arm at heart level.'],crisis:['Rest quietly and re-measure after 5 minutes.','If it is still above 180/120, seek urgent medical care.','Call emergency services at once if you have chest pain, breathlessness, weakness or a severe headache.','Don’t drive yourself if you feel unwell. Ask someone to take you.']},
+ pu:{low:'Your heart beats slower than 60 times a minute. Fit and active people often run this low. If you feel dizzy or faint, see a doctor.',normal:'Your resting heart rate is in the healthy 60–100 BPM range.',high:'Your heart beats faster than 100 times a minute. Exercise, caffeine, stress, fever or dehydration can cause this. If it stays high at rest, check with a doctor.'},
+ pp:{low:'The gap between your numbers is small. Often harmless, but mention it to a doctor if it stays this narrow.',normal:'Pulse pressure is the gap between top and bottom numbers. Yours is in the typical 30–50 range.',wide:'The gap is wider than typical. This can reflect stiffer arteries and is worth tracking.'},
+ mp:{low:'Mean pressure is below 70. Organs may get less blood flow than ideal, so see a doctor if you feel unwell.',normal:'Mean arterial pressure is your average pressure through a heartbeat. 70–100 is enough to nourish your organs.',high:'Mean pressure is above 100, so your average load on the arteries is high.'},
+ nm:{pu:{low:'Low / Bradycardia',normal:'Normal',high:'High / Tachycardia'},pp:{low:'Narrow',normal:'Normal',wide:'Wide'},mp:{low:'Low',normal:'Normal',high:'High'}},
+ urg:'Urgent: a reading above 180/120 needs prompt medical attention. Rest for five minutes and measure again. If it stays this high, or you have chest pain, breathlessness, a severe headache, weakness or trouble speaking, call your local emergency number now.',
+ age:{child:'Adult ranges don’t apply to children and teens. Please check this reading against a paediatric chart with your doctor.',senior:'At 65 and over, doctors often aim for under 130/80 if it is tolerated, while watching for dizziness on standing. Agree your own target with your doctor.',adult:'For your age group, the goal is to stay below 120/80.'},
+ say:function(n,s,d,p){return n+'Your blood pressure is '+s+' over '+d+', and your pulse is '+p+' beats per minute. '},
+ ui:{rec:'Recorded',hx:'What this means',ht:'Your next steps',sp:'🔊 Speak',stp:'⏹ Stop',cp:'📋 Copy summary',ok:'Copied!',ag:'Age note',yrs:'yrs',reading:'Reading',avg:function(n,x){return 'Average of last '+n+' readings: '+x},t1:'SYS · pumping pressure',t2:'DIA · resting pressure',t3:'Pulse',t4:'Pulse pressure',t5:'Mean arterial pressure'}
+},
+ur:{
+ st:{low:'Kam (Low)',normal:'Normal',elevated:'Thora Zyada (Elevated)',s1:'High (Stage 1)',s2:'High (Stage 2)',crisis:'Hypertensive Crisis (Khatarnak)'},
+ vd:{low:'Normal nahi: usual se kam hai',normal:'Ji haan, yeh normal hai',elevated:'Normal se thora zyada hai',s1:'Normal nahi: high hai',s2:'Normal nahi: high hai',crisis:'Normal nahi: khatarnak hai, foran action len'},
+ sys:{low:'Aap ka upar wala number usual se kam hai. Ho sakta hai dil kam zor se khoon pump kar raha ho.',normal:'Aap ka upar wala number theek hai. Dil munasib zor se khoon pump kar raha hai.',elevated:'Aap ka upar wala number thora zyada hai. Dil zaroorat se zara zyada zor laga raha hai.',s1:'Aap ka upar wala number high hai. Dil ko khoon pump karne mein zyada mushkil ho rahi hai.',s2:'Aap ka upar wala number kaafi high hai. Har dhadkan par dil aur nasain bohat dabao mein hain.',crisis:'Aap ka upar wala number khatarnak had tak high hai. Fori tibbi madad len.'},
+ dia:{low:'Aap ka neeche wala number kam hai. Dhadkano ke darmiyan nasain zyada dheeli ho rahi hain.',normal:'Aap ka neeche wala number theek hai. Nasain dhadkano ke darmiyan achi tarah aaram kar rahi hain.',s1:'Aap ka neeche wala number zyada hai. Nasain dhadkano ke darmiyan poori tarah dheeli nahi ho rahin.',s2:'Aap ka neeche wala number kaafi high hai. Dil ke aaram ke waqt bhi nasain dabao mein rehti hain.',crisis:'Aap ka neeche wala number khatarnak had tak high hai. Fori tibbi madad len.'},
+ ex:{low:'Aap ka blood pressure kam hai. Bohat se logon ke liye yeh normal aur be-zarar hota hai, khaas taur par agar aap theek mehsoos kar rahe hon. Chakkar, kamzori ya behoshi jaisa lage to doctor ko batayen.',normal:'Khushkhabri: dono number theek hain. Aap ka dil achi tarah kaam kar raha hai aur nasain aaram se hain. Isi tarah ki achi aadatein jari rakhen.',elevated:'Aap ka pressure ideal se thora zyada hai magar abhi high nahi. Yeh sirf pehli khabardari hai, bimari nahi. Chhoti lifestyle tabdeeliyan isay wapas normal par la sakti hain.',s1:'Aap ka pressure Stage 1 high hai. Dil ko zyada zor lagana par raha hai. Ek reading se bimari ka faisla nahi hota, lekin baar baar aisi reading aaye to doctor se baat karen.',s2:'Aap ka pressure Stage 2 high hai, jo waqt ke saath dil aur nasain par bojh dalta hai. Aaram ke baad dobara naapen aur jald doctor se milen.',crisis:'Yeh reading khatarnak range mein hai, jo dil, dimagh aur gurdon ko jaldi nuqsan pohancha sakti hai. Baith kar 5 minute aaram karen aur dobara naapen. Agar phir bhi itna hi ho to foran madad len.'},
+ tips:{low:['Din bhar pani piyen. Namak sirf doctor ki ijazat se barhayen.','Baithne ya letne se aahista uthen taake chakkar na aaye.','Ek saath bhari khane ke bajaye thora thora kayi dafa khayen.','Behoshi, uljhan ya dhundla nazar aaye to doctor ko dikhayen.'],normal:['Hafte mein taqriban 150 minute tez chalen ya warzish karen.','Phal, sabziyan, sabut anaaj aur kam namak wali ghiza khayen.','7 se 9 ghante soyen aur tension kam rakhen.','Har kuch mahine baad dobara check karte rahen.'],elevated:['Namkeen aur processed khane kam karen.','Aksar dinon mein 30 minute tez raftari se chalen.','Sigaret aur alcohol se parhez karen.','Aik hafte tak roz aik hi waqt par check karen aur note karen.'],s1:['Namak kam karen aur kela, palak aur daalon jaisi potassium wali cheezen khayen.','Roz 30 minute chalen aur wazan munasib rakhen.','5 minute gehri aahista saansen len taake tension kam ho.','Doctor se milen aur hafte bhar ki readings saath le jayen.'],s2:['Jald doctor se appointment lein aur apni readings saath le jayen.','Namak bohat kam karen aur talay hue aur processed khane se bachen.','Dawai chal rahi ho to doctor ke mutabiq lein, khud band na karen.','5 minute aaram karen, phir baith kar, pair zameen par, bazu dil ki sateh par rakh kar dobara naapen.'],crisis:['Khamoshi se aaram karen aur 5 minute baad dobara naapen.','Agar ab bhi 180/120 se upar ho to foran tibbi madad len.','Seene mein dard, saans phoolna, kamzori ya shadeed sar dard ho to foran emergency ko call karen.','Tabiyat kharab ho to khud gari na chalayen, kisi se madad len.']},
+ pu:{low:'Aap ka dil minute mein 60 se kam baar dhadak raha hai. Active logon mein aksar aisa hota hai. Chakkar aaye to doctor ko dikhayen.',normal:'Aap ke dil ki aaram ki raftar 60 se 100 BPM ke theek daire mein hai.',high:'Aap ka dil minute mein 100 se zyada baar dhadak raha hai. Warzish, chai coffee, tension, bukhar ya pani ki kami wajah ho sakti hai. Aaram mein bhi zyada rahe to doctor se milen.'},
+ pp:{low:'Upar aur neeche ke number ka farq kam hai. Aksar be-zarar hota hai, lekin barqarar rahe to doctor ko batayen.',normal:'Pulse pressure upar aur neeche number ka farq hai. Aap ka 30 se 50 ke aam daire mein hai.',wide:'Farq aam se zyada hai. Yeh nasain ke sakht hone ki alamat ho sakti hai, isay dekhte rahen.'},
+ mp:{low:'Average pressure 70 se kam hai. Aza ko khoon kam mil sakta hai, tabiyat kharab ho to doctor se milen.',normal:'MAP ek dhadkan mein average pressure hai. 70 se 100 aza ko khoon pohanchane ke liye kaafi hai.',high:'Average pressure 100 se zyada hai, yani nasain par ausat bojh zyada hai.'},
+ nm:{pu:{low:'Kam / Bradycardia',normal:'Normal',high:'Zyada / Tachycardia'},pp:{low:'Tang (Narrow)',normal:'Normal',wide:'Chora (Wide)'},mp:{low:'Kam',normal:'Normal',high:'Zyada'}},
+ urg:'Zaroori: 180/120 se upar reading par fori tibbi madad chahiye. 5 minute aaram karke dobara naapen. Agar phir bhi itna hi ho, ya seene mein dard, saans phoolna, shadeed sar dard, kamzori ya bolne mein mushkil ho to abhi emergency number par call karen.',
+ age:{child:'Bachon aur nojawano ke liye bado wali ranges lagu nahi hoti. Apne doctor se bachon ke chart ke mutabiq check karwayen.',senior:'65 saal aur us se zyada umar mein doctor aksar 130/80 se kam ka hadaf rakhte hain, lekin khare hone par chakkar par bhi nazar rakhen. Apna hadaf doctor se tay karen.',adult:'Aap ki umar ke liye hadaf 120/80 se neeche rehna hai.'},
+ say:function(n,s,d,p){return n+'Aap ka blood pressure '+s+' over '+d+' hai aur pulse '+p+' beats per minute hai. '},
+ ui:{rec:'Record ka waqt',hx:'Is ka matlab kya hai',ht:'Aap ke agle qadam',sp:'🔊 Sunayen',stp:'⏹ Rokiye',cp:'📋 Summary copy karen',ok:'Copy ho gaya!',ag:'Umar ke baare mein',yrs:'saal',reading:'Reading',avg:function(n,x){return 'Pichli '+n+' readings ka average: '+x},t1:'SYS · dil ka dabao (upar wala)',t2:'DIA · aaraam ka dabao (neeche wala)',t3:'Nabz (Pulse)',t4:'Pulse pressure (farq)',t5:'Mean arterial pressure (MAP)'}
+}};
 
-  function pulseCat(p){return p<60?{n:'Low / Bradycardia',k:'low',t:'Your heart beats slower than 60 times a minute. Fit and active people often run this low without problems. If you feel dizzy or faint, see a doctor.'}:
-    p>100?{n:'High / Tachycardia',k:'s1',t:'Your heart beats faster than 100 times a minute. Exercise, caffeine, stress, fever or dehydration can cause this. If it stays high at rest, check with a doctor.'}:
-    {n:'Normal',k:'normal',t:'Your resting heart rate is in the healthy 60–100 BPM range.'}}
-  function ppCat(pp){return pp<30?{n:'Narrow',k:'low',t:'The gap between your numbers is small. Often harmless, but worth mentioning to a doctor if it stays this narrow.'}:
-    pp>50?{n:'Wide',k:'elevated',t:'The gap is wider than typical. This can reflect stiffer arteries and is worth tracking over time.'}:
-    {n:'Normal',k:'normal',t:'Pulse pressure is the gap between top and bottom numbers. Yours is in the typical 30–50 range.'}}
-  function mapCat(m){return m<70?{n:'Low',k:'low',t:'Mean pressure is below 70. Organs may get less blood flow than ideal, so check with a doctor if you feel unwell.'}:
-    m>100?{n:'High',k:'s1',t:'Mean pressure is above 100, meaning your average load on the arteries is high.'}:
-    {n:'Normal',k:'normal',t:'Mean arterial pressure is your average pressure through a heartbeat. 70–100 is enough to nourish your organs.'}}
+function sysCat(s){return s>180?'crisis':s>=140?'s2':s>=130?'s1':s>=120?'elevated':s<90?'low':'normal'}
+function diaCat(d){return d>120?'crisis':d>=90?'s2':d>=80?'s1':d<60?'low':'normal'}
+function overall(s,d){var a=sysCat(s),b=diaCat(d),r=Math.max(S[a].r,S[b].r);if(r<=1)return(a==='low'||b==='low')?'low':'normal';return ORDER[r]}
+function pCat(p){return p<60?'low':p>100?'high':'normal'}
+function ppCat(x){return x<30?'low':x>50?'wide':'normal'}
+function mapCat(m){return m<70?'low':m>100?'high':'normal'}
+function fmt(ts){return new Date(ts).toLocaleString([],{weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit'})}
+function esc(x){return String(x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function mini(title,val,unit,ck,nm,txt){var s=S[ck];return '<div class="mini" style="--c:'+s.c+';--ci:'+s.i+'"><h3>'+title+'</h3><div class="v">'+val+' <small>'+unit+'</small></div><span class="tag">'+nm+'</span><p>'+txt+'</p></div>'}
+function setError(m){var e=$('err');e.textContent=m;e.classList.toggle('show',!!m)}
 
-  function mini(title,val,unit,cat,txt){
-    var s=S[cat.k||cat];
-    return '<div class="mini" style="--c:'+s.c+';--ci:'+s.i+'"><h3>'+title+'</h3><div class="v">'+val+' <small>'+unit+'</small></div><span class="tag">'+(cat.n||s.n)+'</span><p>'+txt+'</p></div>';
-  }
+$('bar').innerHTML=ORDER.map(function(k){return '<i style="background:'+S[k].c+'"></i>'}).join('')+'<div class="marker" id="mk" style="left:8.33%"></div>';
 
-  // gauge bar
-  $('bar').innerHTML=ORDER.map(function(k){return '<i style="background:'+S[k].c+'"></i>'}).join('')+'<div class="marker" id="mk" style="left:8.33%"></div>';
+function render(){
+ var r=last,t=T[lang],u=t.ui,pp=r.s-r.d,mp=Math.round((r.s+2*r.d)/3),sk=sysCat(r.s),dk=diaCat(r.d),pk=pCat(r.p),qk=ppCat(pp),mk=mapCat(mp);
+ root.style.setProperty('--accent',S[r.k].c);root.style.setProperty('--ink',S[r.k].i);
+ $('rb').textContent=r.s+'/'+r.d;$('rp').textContent='mmHg · '+r.p+' BPM';
+ $('who').textContent=[r.name,r.age?r.age+' '+u.yrs:''].filter(Boolean).join(' · ');
+ $('rs').textContent=t.st[r.k];$('vd').textContent=t.vd[r.k];$('stamp').textContent=u.rec+': '+fmt(r.t);
+ $('urg').textContent=t.urg;$('urg').classList.toggle('show',r.s>180||r.d>120);
+ $('cards').innerHTML=mini(u.t1,r.s,'mmHg',sk,t.st[sk],t.sys[sk])+mini(u.t2,r.d,'mmHg',dk,t.st[dk],t.dia[dk])+mini(u.t3,r.p,'BPM',PC[pk],t.nm.pu[pk],t.pu[pk])+mini(u.t4,pp,'mmHg',PPC[qk],t.nm.pp[qk],t.pp[qk])+mini(u.t5,mp,'mmHg',PC[mk],t.nm.mp[mk],t.mp[mk]);
+ var ac=$('agecard');if(r.age){ac.style.display='';ac.innerHTML='<h2>'+u.ag+'</h2><p>'+t.age[r.age<18?'child':r.age>=65?'senior':'adult']+'</p>'}else ac.style.display='none';
+ $('expl').textContent=t.ex[r.k];$('hExp').textContent=u.hx;$('hTips').textContent=u.ht;
+ $('tips').innerHTML=t.tips[r.k].map(function(x){return '<li>'+x+'</li>'}).join('');
+ $('spk').textContent=u.sp;$('stp').textContent=u.stp;$('cpy').textContent=u.cp;
+ $('mk').style.left=(S[r.k].r*100/6+100/12)+'%';
+}
+function speech(r){var t=T[lang];return t.say(r.name?r.name+'. ':'',r.s,r.d,r.p)+t.vd[r.k]+'. '+t.ex[r.k]+' '+t.pu[pCat(r.p)]+' '+t.tips[r.k][0]+(r.s>180||r.d>120?' '+t.urg:'')}
+function speak(){if(!synth||!last)return;try{synth.cancel();var u=new SpeechSynthesisUtterance(speech(last)),l=lang==='ur'?'en-IN':'en-US',vs=synth.getVoices();u.lang=l;var v=vs.filter(function(x){return x.lang.replace('_','-')===l})[0]||vs.filter(function(x){return x.lang.indexOf('en')===0})[0];if(v)u.voice=v;u.rate=.92;synth.speak(u)}catch(e){}}
+function stop(){try{synth&&synth.cancel()}catch(e){}}
+function copy(txt,btn){var o=btn.textContent;function ok(){btn.textContent=T[lang].ui.ok;setTimeout(function(){btn.textContent=o},1500)}
+ function fb(){var a=document.createElement('textarea');a.value=txt;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){}document.body.removeChild(a)}
+ try{navigator.clipboard.writeText(txt).then(ok,fb)}catch(e){fb()}}
 
-  function setError(m){var e=$('err');e.textContent=m;e.classList.toggle('show',!!m)}
+function getAge(){var d=$('dob').value,a=$('age').value.trim();
+ if(d){var b=new Date(d),n=new Date();if(isNaN(b)||b>n)return{e:'Date of birth can’t be in the future.'};var y=n.getFullYear()-b.getFullYear(),m=n.getMonth()-b.getMonth();if(m<0||(m===0&&n.getDate()<b.getDate()))y--;if(y>120)return{e:'Please check the date of birth.'};return{v:y}}
+ if(a){a=Number(a);if(a%1||a<1||a>120)return{e:'Age should be a whole number between 1 and 120, or leave it blank.'};return{v:a}}
+ return{v:null}}
 
-  function evaluate(){
-    var s=$('sys').value.trim(),d=$('dia').value.trim(),p=$('pulse').value.trim();
-    if(!s||!d||!p){return setError('Please fill in all three fields: SYS, DIA and PULSE.')}
-    s=Number(s);d=Number(d);p=Number(p);
-    if(!isFinite(s)||!isFinite(d)||!isFinite(p)||s%1||d%1||p%1){return setError('Please enter whole numbers only.')}
-    if(s<50||s>260){return setError('SYS looks unusual. Enter a value between 50 and 260 mmHg.')}
-    if(d<30||d>160){return setError('DIA looks unusual. Enter a value between 30 and 160 mmHg.')}
-    if(p<25||p>220){return setError('PULSE looks unusual. Enter a value between 25 and 220 BPM.')}
-    if(s<=d){return setError('SYS (top number) must be higher than DIA (bottom number). Check that you haven’t swapped them.')}
-    setError('');
+function evaluate(){
+ var s=$('sys').value.trim(),d=$('dia').value.trim(),p=$('pulse').value.trim();
+ if(!s||!d||!p)return setError('Please fill in all three fields: SYS, DIA and PULSE.');
+ s=Number(s);d=Number(d);p=Number(p);
+ if(!isFinite(s)||!isFinite(d)||!isFinite(p)||s%1||d%1||p%1)return setError('Please enter whole numbers only.');
+ if(s<50||s>260)return setError('SYS looks unusual. Enter a value between 50 and 260 mmHg.');
+ if(d<30||d>160)return setError('DIA looks unusual. Enter a value between 30 and 160 mmHg.');
+ if(p<25||p>220)return setError('PULSE looks unusual. Enter a value between 25 and 220 BPM.');
+ if(s<=d)return setError('SYS (top number) must be higher than DIA (bottom number). Check that you haven’t swapped them.');
+ var ag=getAge();if(ag.e)return setError(ag.e);
+ setError('');
+ last={name:$('name').value.trim().slice(0,30),age:ag.v,s:s,d:d,p:p,k:overall(s,d),t:Date.now()};
+ document.body.classList.add('has-result');
+ root.style.setProperty('--beat',Math.max(.35,Math.min(2.4,60/p)).toFixed(2)+'s');
+ render();
+ var res=$('results');res.classList.remove('show');void res.offsetWidth;res.classList.add('show');
+ res.scrollIntoView({behavior:'smooth',block:'start'});
+ saveLog({t:last.t,name:last.name,age:last.age,s:s,d:d,p:p,k:last.k});
+ if($('auto').checked)speak();
+}
+function reset(){
+ ['sys','dia','pulse'].forEach(function(i){$(i).value=''});
+ setError('');stop();last=null;$('results').classList.remove('show');document.body.classList.remove('has-result');
+ root.style.removeProperty('--accent');root.style.removeProperty('--ink');root.style.removeProperty('--beat');$('sys').focus();
+}
 
-    var k=overall(s,d),st=S[k],pp=s-d,mp=Math.round((s+2*d)/3);
-    root.style.setProperty('--accent',st.c);root.style.setProperty('--ink',st.i);
-    document.body.classList.add('has-result');
-    $('rb').textContent=s+'/'+d;$('rp').textContent='mmHg · '+p+' BPM';
-    $('rs').textContent=st.n;
-    $('urg').classList.toggle('show',s>180||d>120);
-    $('cards').innerHTML=
-      mini('SYS · pumping pressure',s,'mmHg',sysCat(s),SYS_TXT[sysCat(s)])+
-      mini('DIA · resting pressure',d,'mmHg',diaCat(d),DIA_TXT[diaCat(d)])+
-      mini('Pulse',p,'BPM',pulseCat(p),pulseCat(p).t)+
-      mini('Pulse pressure',pp,'mmHg',ppCat(pp),ppCat(pp).t)+
-      mini('Mean arterial pressure',mp,'mmHg',mapCat(mp),mapCat(mp).t);
-    $('expl').textContent=EXPL[k];
-    $('tips').innerHTML=TIPS[k].map(function(t){return '<li>'+t+'</li>'}).join('');
-    $('heart').style.setProperty('--beat',Math.max(.35,Math.min(2.4,60/p)).toFixed(2)+'s');
-    $('heart').parentNode.style.setProperty('--beat',Math.max(.35,Math.min(2.4,60/p)).toFixed(2)+'s');
-    var res=$('results');res.classList.remove('show');void res.offsetWidth;res.classList.add('show');
-    $('mk').style.left=(S[k].r*100/6+100/12)+'%';
-    res.scrollIntoView({behavior:'smooth',block:'start'});
-    saveLog({t:Date.now(),s:s,d:d,p:p,k:k});
-  }
+function loadLog(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return memLog}}
+function saveLog(e){var l=loadLog();l.unshift(e);l=l.slice(0,10);memLog=l;try{localStorage.setItem(KEY,JSON.stringify(l))}catch(x){}renderLog()}
+function renderLog(){
+ var l=loadLog(),u=T[lang].ui;
+ $('clearLog').style.display=$('copyLog').style.display=l.length?'':'none';
+ if(!l.length){$('log').innerHTML='<p class="empty">No readings yet. Your last few checks will appear here, saved only in this browser.</p>';$('avg').textContent='';return}
+ $('log').innerHTML=l.map(function(e){var s=S[e.k]||S.normal;
+  return '<div class="log-row"><div class="when"><b style="color:var(--text)">'+esc(e.name||u.reading)+(e.age?' · '+e.age:'')+'</b><br>'+fmt(e.t)+'</div><b>'+e.s+'/'+e.d+'</b><span>'+e.p+'</span><span class="chip" style="--c:'+s.c+';--ci:'+s.i+'">'+T[lang].st[e.k]+'</span></div>'}).join('');
+ var a=function(k){return Math.round(l.reduce(function(x,e){return x+e[k]},0)/l.length)};
+ $('avg').textContent=l.length>1?u.avg(l.length,a('s')+'/'+a('d')+' · '+a('p')+' BPM'):'';
+}
 
-  function reset(){
-    ['sys','dia','pulse'].forEach(function(i){$(i).value=''});
-    setError('');$('results').classList.remove('show');
-    document.body.classList.remove('has-result');
-    root.style.removeProperty('--accent');root.style.removeProperty('--ink');
-    $('heart').style.removeProperty('--beat');
-    $('sys').focus();
-  }
-
-  // log
-  var KEY='bpMeterLog';
-  function loadLog(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return memLog}}
-  var memLog=[];
-  function saveLog(entry){
-    var l=loadLog();l.unshift(entry);l=l.slice(0,8);memLog=l;
-    try{localStorage.setItem(KEY,JSON.stringify(l))}catch(e){}
-    renderLog();
-  }
-  function renderLog(){
-    var l=loadLog();
-    $('clearLog').style.display=l.length?'':'none';
-    if(!l.length){$('log').innerHTML='<p class="empty">No readings yet. Your last few checks will appear here, saved only in this browser.</p>';return}
-    $('log').innerHTML=l.map(function(e){
-      var s=S[e.k]||S.normal;
-      var when=new Date(e.t).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
-      return '<div class="log-row"><div class="when">'+when+'</div><b>'+e.s+'/'+e.d+'</b><span>'+e.p+' BPM</span><span class="chip" style="--c:'+s.c+';--ci:'+s.i+'">'+s.n+'</span></div>';
-    }).join('');
-  }
-  $('clearLog').onclick=function(){memLog=[];try{localStorage.removeItem(KEY)}catch(e){}renderLog()};
-
-  $('go').onclick=evaluate;
-  $('reset').onclick=reset;
-  ['sys','dia','pulse'].forEach(function(i){$(i).addEventListener('keydown',function(e){if(e.key==='Enter')evaluate()})});
-  renderLog();
+$('go').onclick=evaluate;$('reset').onclick=reset;$('spk').onclick=speak;$('stp').onclick=stop;
+if(!synth){$('spk').style.display=$('stp').style.display=$('auto').parentNode.style.display='none'}
+$('cpy').onclick=function(){var r=last,t=T[lang];if(!r)return;copy('BP & Pulse reading\n'+(r.name?'Name: '+r.name+'\n':'')+(r.age?'Age: '+r.age+'\n':'')+'Time: '+fmt(r.t)+'\nBP: '+r.s+'/'+r.d+' mmHg, Pulse: '+r.p+' BPM\nStatus: '+t.st[r.k]+'\n'+t.vd[r.k],this)};
+$('copyLog').onclick=function(){var q=function(x){return '"'+String(x).replace(/"/g,'""')+'"'};copy(['Name,Date/Time,Age,SYS,DIA,Pulse,Status'].concat(loadLog().map(function(e){return [q(e.name||''),q(fmt(e.t)),e.age||'',e.s,e.d,e.p,q(T.en.st[e.k])].join(',')})).join('\n'),this)};
+$('clearLog').onclick=function(){memLog=[];try{localStorage.removeItem(KEY)}catch(e){}renderLog()};
+$('seg').onclick=function(e){var l=e.target.getAttribute&&e.target.getAttribute('data-l');if(!l)return;lang=l;stop();Array.prototype.forEach.call($('seg').children,function(b){b.classList.toggle('on',b.getAttribute('data-l')===l)});if(last)render();renderLog()};
+$('dob').onchange=function(){var r=getAge();if(r.e){setError(r.e)}else{setError('');if(r.v!=null)$('age').value=r.v}};
+$('age').oninput=function(){$('dob').value=''};
+['sys','dia','pulse'].forEach(function(i){$(i).addEventListener('keydown',function(e){if(e.key==='Enter')evaluate()})});
+renderLog();
 })();
 </script>
 </body>
